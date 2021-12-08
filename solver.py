@@ -16,10 +16,13 @@ def solve(tasks):
     tasks.sort(reverse=True, key= lambda t: t.get_max_benefit())
 
     #change deadlines of tasks that always take a penalty (because duration>deadline) for schedling purposes
+    for task in tasks:
+        if task.get_deadline() < task.get_duration():
+            task.deadline = task.get_duration() 
 
     for task in tasks:
         #print(task)
-        endTimestep = task.get_deadline() #-1
+        endTimestep = task.get_deadline()#.effective_deadline #-1
 
         while endTimestep > 0:
             #print("end "+str(endTimestep))
@@ -46,6 +49,42 @@ def solve(tasks):
             scheduledTasks[startTimestep] = task.get_task_id()
             break
 
+    firstRoundTasks = list(scheduledTasks.values())
+
+
+    #schedule any late tasks as soon as possible
+    for task in tasks:
+        if task.get_task_id() in firstRoundTasks:
+            continue
+        
+        startTimestep = task.get_deadline() - 1
+
+        while startTimestep < 1439:
+            #print("start "+str(startTimestep))
+            startTimestep += 1
+            if timeline[startTimestep] != 0:
+                continue
+            endTimestep = startTimestep + task.get_duration() - 1
+            #print("start "+str(endTimestep))
+            if endTimestep >= 1440:
+                break
+
+            blocked = False
+            for i in range(startTimestep, endTimestep + 1):
+                if timeline[i] != 0:
+                    blocked = True
+                    break
+            
+            if blocked:
+               continue
+            
+            for i in range(startTimestep, endTimestep + 1):
+                timeline[i] = task.get_task_id()
+
+            scheduledTasks[startTimestep] = task.get_task_id()
+            break
+
+
     orderedTaskSTs = list(scheduledTasks.keys())
     orderedTaskSTs.sort()
 
@@ -55,10 +94,11 @@ def solve(tasks):
         orderedTasks.append(scheduledTasks[k])
  
     return orderedTasks
+    #return timeline
 
  
 #a = Task(6, 10, 5, 45)
-#b = Task(7, 9, 4, 45.2)
+#b = Task(7, 10, 15, 45.2)
 
 #x=[Task(1, 237, 23, 61),
 #Task(2, 757, 51, 29),
@@ -71,7 +111,7 @@ def solve(tasks):
 #Task(9, 1403, 21, 40),
 #Task(10, 41, 40, 77)]
 
-
+#x = [b]
 #print(solve(x))
 
 
