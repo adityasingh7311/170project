@@ -13,7 +13,7 @@ def solve(tasks):
     timeline = [0] * 1440
     scheduledTasks = {} #k: startTimestep v: task_id
     
-    tasks.sort(reverse=True, key= lambda t: t.get_max_benefit())
+    tasks.sort(reverse=True, key= lambda t: .5*(t.get_max_benefit()/100) + .5*(1/t.get_duration()))
 
     #change deadlines of tasks that always take a penalty (because duration>deadline) for schedling purposes
     for task in tasks:
